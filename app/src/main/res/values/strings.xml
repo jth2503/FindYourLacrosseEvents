@@ -1,7 +1,33 @@
 <resources>
     <string name="app_name">FindYourLacrosseEvents</string>
 
+    <!-- Back4App Keys -->
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_app_id">f6px2oxKez6qwEfpJqrNe8vyR4RJu6Orbq2SGrpB</string>
     <string name="back4app_client_key">6zP3K36taWHmAxRCoVenI7qYmHlSKStFXhqRKrjf</string>
+
+
+    <!-- Menu Items -->
+    <string name="map_title">Map of events</string>
+    <string name="new_event_title">Add or edit event</string>
+    <string name="favorites_title">My Favorites</string>
+
+    <!-- FilterBottomSheet -->
+    <string name="filter_header">Filter shown events</string>
+    <string name="filter_search_radius_label">Search radius in km: </string>
+    <string name="filter_event_name_label">Event name</string>
+    <string name="filter_event_dates_start_label">Show events from…</string>
+    <string name="filter_event_dates_end_label">Show events until…</string>
+    <string name="filter_genders_label">Genders:</string>
+    <string name="filter_discipline_label">Discipline:</string>
+    <string name="filter_type_label">Event type:</string>
+
+    <!-- RequestPermissionsFragment -->
+    <string name="permission_explanation">You need to permit this app to access your location to use the \"Event map\" feature.\n
+        If no dialog shows up after clicking the button below, you may have to enable access to your location manually in your device settings.</string>
+    <string name="permission_button">You have my permission!</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
