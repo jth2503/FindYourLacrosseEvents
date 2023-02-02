@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FindYourLacrosseEvents</string>
+
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+    <string name="back4app_app_id">f6px2oxKez6qwEfpJqrNe8vyR4RJu6Orbq2SGrpB</string>
+    <string name="back4app_client_key">6zP3K36taWHmAxRCoVenI7qYmHlSKStFXhqRKrjf</string>
+</resources>
