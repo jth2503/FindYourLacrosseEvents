@@ -28,6 +28,25 @@
     <string name="permission_button">You have my permission!</string>
 
 
+    <!-- NewEventFragment -->
+    <string name="new_event_introduction">Hey! It\'s great that you want to share your event with others from the lacrosse community. To do so please fill in the following data.</string>
+    <string name="new_event_name">What\'s the name of your event?</string>
+    <string name="new_event_address">What is the address of your event?</string>
+    <string name="new_event_address_check">Please confirm your event\'s full address.</string>
+    <string name="new_event_start">Start date</string>
+    <string name="new_event_end">End date</string>
+    <string name="new_event_genders_label">What genders is your event for?</string>
+    <string name="new_event_discipline_label">What disciplines are being played at your event?</string>
+    <string name="new_event_event_type_label">What type of event are you planning?</string>
+    <string name="new_event_start_dialog">What is the first day of your event?</string>
+    <string name="new_event_end_dialog">What is the last day of your event?</string>
+    <string name="new_event_validate_address">Validate address</string>
+    <string name="new_event_create">Finish</string>
+    <string name="new_event_save_successful">Event created successfully.</string>
+    <string name="new_event_save_failed">An unexpected error occurred while creating event. Please contact the developer team.</string>
+    <string name="new_event_values_required">Please fill out all form fields.</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
