@@ -8,15 +8,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Event {
+    private String id = "";
     private String name = "";
     private LocalDate startDate = null;
-    private LocalDate EndDate = null;
+    private LocalDate endDate = null;
     private String address = "";
     private ParseGeoPoint location = null;
     private ParseObject eventType = null;
-    private final List<ParseObject> genders = new ArrayList<>();
-    private final List<ParseObject> disciplines = new ArrayList<>();
+    private List<ParseObject> genders = new ArrayList<>();
+    private List<ParseObject> disciplines = new ArrayList<>();
 
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getName() {
         return name;
     }
@@ -30,10 +37,10 @@ public class Event {
         this.startDate = startDate;
     }
     public LocalDate getEndDate() {
-        return EndDate;
+        return endDate;
     }
     public void setEndDate(LocalDate endDate) {
-        EndDate = endDate;
+        this.endDate = endDate;
     }
     public String getAddress() {
         return address;
@@ -56,7 +63,25 @@ public class Event {
     public List<ParseObject> getGenders() {
         return genders;
     }
+    public void setGenders(List<ParseObject> genders) {
+        this.genders = genders;
+    }
     public List<ParseObject> getDisciplines() {
         return disciplines;
+    }
+    public void setDisciplines(List<ParseObject> disciplines) {
+        this.disciplines = disciplines;
+    }
+
+    public void resetData() {
+        id = "";
+        name = "";
+        startDate = null;
+        endDate = null;
+        address = "";
+        location = null;
+        eventType = null;
+        genders.clear();
+        disciplines.clear();
     }
 }

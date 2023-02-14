@@ -6,27 +6,34 @@
     <string name="back4app_app_id">f6px2oxKez6qwEfpJqrNe8vyR4RJu6Orbq2SGrpB</string>
     <string name="back4app_client_key">6zP3K36taWHmAxRCoVenI7qYmHlSKStFXhqRKrjf</string>
 
+    <!-- RequestPermissionsFragment -->
+    <string name="permission_explanation">You need to permit this app to access your location to use the \"Event map\" feature.\n
+        If no dialog shows up after clicking the button below, you may have to enable access to your location manually in your device settings.</string>
+    <string name="permission_button">You have my permission!</string>
 
     <!-- Menu Items -->
     <string name="map_title">Map of events</string>
     <string name="new_event_title">Add or edit event</string>
     <string name="favorites_title">My Favorites</string>
 
+    <!-- Marker Info -->
+    <string name="marker_favorite_unmarked">Long click window to mark as favorite.</string>
+    <string name="marker_favorite_marked">Long click window to unmark as favorite.</string>
+    <string name="marker_address">Address: %1$s</string>
+    <string name="marker_dates">Dates: %1$s to %2$s</string>
+    <string name="marker_genders">Genders: %1$s</string>
+    <string name="marker_disciplines">Disciplines: %1$s</string>
+    <string name="marker_event_type">Event Type: %1$s</string>
+
     <!-- FilterBottomSheet -->
     <string name="filter_header">Filter shown events</string>
-    <string name="filter_search_radius_label">Search radius in km: </string>
+    <string name="filter_search_radius">Show events … km around my location</string>
     <string name="filter_event_name_label">Event name</string>
     <string name="filter_event_dates_start_label">Show events from…</string>
     <string name="filter_event_dates_end_label">Show events until…</string>
     <string name="filter_genders_label">Genders:</string>
     <string name="filter_discipline_label">Discipline:</string>
     <string name="filter_type_label">Event type:</string>
-
-    <!-- RequestPermissionsFragment -->
-    <string name="permission_explanation">You need to permit this app to access your location to use the \"Event map\" feature.\n
-        If no dialog shows up after clicking the button below, you may have to enable access to your location manually in your device settings.</string>
-    <string name="permission_button">You have my permission!</string>
-
 
     <!-- NewEventFragment -->
     <string name="new_event_introduction">Hey! It\'s great that you want to share your event with others from the lacrosse community. To do so please fill in the following data.</string>

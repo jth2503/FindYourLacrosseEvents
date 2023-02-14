@@ -144,7 +144,7 @@ public class NewEventFragment extends Fragment {
                 cgGender.clearCheck();
                 cgDiscipline.clearCheck();
                 cgEventType.clearCheck();
-                viewModel.instantiateNewEvent();
+                viewModel.clearNewEventData();
             } else {
                 Toast.makeText(getContext(), R.string.new_event_save_failed, Toast.LENGTH_SHORT).show();
             }
@@ -208,13 +208,13 @@ public class NewEventFragment extends Fragment {
     }
 
     private void setupEditTextTextWatchers() {
-        etName.addTextChangedListener(new MyTextWatcher() {
+        etName.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.getNewEvent().setName(s.toString());
             }
         });
-        etAddress.addTextChangedListener(new MyTextWatcher() {
+        etAddress.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 // address is no longer validated after edit
@@ -225,29 +225,19 @@ public class NewEventFragment extends Fragment {
                 viewModel.getNewEvent().setAddress(s.toString());
             }
         });
-        etStartDate.addTextChangedListener(new MyTextWatcher() {
+        etStartDate.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (s != null && !s.toString().equals(Constants.EMPTY_STRING))
+                if (!Util.StringIsNullOrEmpty(s))
                     viewModel.getNewEvent().setStartDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
             }
         });
-        etEndDate.addTextChangedListener(new MyTextWatcher() {
+        etEndDate.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (s != null && !s.toString().equals(Constants.EMPTY_STRING))
+                if (!Util.StringIsNullOrEmpty(s))
                     viewModel.getNewEvent().setEndDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
             }
         });
-    }
-
-    // this is just to save lines of code
-    private static class MyTextWatcher implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        @Override
-        public void afterTextChanged(Editable s) {}
     }
 }

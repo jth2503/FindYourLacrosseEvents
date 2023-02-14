@@ -1,5 +1,6 @@
 package de.joristhiele.findyourlacrosseevents;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
@@ -8,6 +9,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -30,18 +34,15 @@ public class MyBackendConnection {
     private final RequestQueue queue;
     private final String MAPS_API_KEY;
 
-    private MutableLiveData<List<ParseObject>> allGenders;
-    private MutableLiveData<List<ParseObject>> allDisciplines;
-    private MutableLiveData<List<ParseObject>> allEventTypes;
-
-    private final MutableLiveData<Pair<String, ParseGeoPoint>> addressCheckResult = new MutableLiveData<>();
-
-    private final MutableLiveData<Boolean> newEventSaved = new MutableLiveData<>();
-
     public MyBackendConnection(RequestQueue queue, String apiKey) {
         this.queue = queue;
         this.MAPS_API_KEY = apiKey;
     }
+
+    //region EventCategories
+    private MutableLiveData<List<ParseObject>> allGenders;
+    private MutableLiveData<List<ParseObject>> allDisciplines;
+    private MutableLiveData<List<ParseObject>> allEventTypes;
 
     public LiveData<List<ParseObject>> getAllGenders() {
         // fetch data from server if none is available
@@ -93,10 +94,57 @@ public class MyBackendConnection {
 
         return allEventTypes;
     }
+    //endregion
+
+    //region Map
+    private MutableLiveData<List<Event>> allEvents;
+
+    public LiveData<List<Event>> getAllEvents() {
+        if (allEvents == null) {
+            allEvents = new MutableLiveData<>();
+            List<Event> result = new ArrayList<>();
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Event");
+            query.findInBackground((objects, e) -> {
+                for (ParseObject object : objects) {
+                    Event eventToAdd = new Event();
+                    eventToAdd.setId(object.getObjectId());
+                    eventToAdd.setName(object.getString("Name"));
+                    eventToAdd.setAddress(object.getString("Address"));
+                    eventToAdd.setLocation(object.getParseGeoPoint("Location"));
+                    eventToAdd.setStartDate(object.getDate("StartDate").toInstant().atZone(ZoneId.of("UTC")).toLocalDate());
+                    eventToAdd.setEndDate(object.getDate("EndDate").toInstant().atZone(ZoneId.of("UTC")).toLocalDate());
+                    object.getParseObject("EventType").fetchIfNeededInBackground((eventType, e1) -> {
+                        if (e1 == null)
+                            eventToAdd.setEventType(eventType);
+                    });
+                    object.getRelation("Genders").getQuery().findInBackground((genders, e2) -> {
+                        if (e2 == null)
+                            eventToAdd.setGenders(genders);
+                    });
+
+                    object.getRelation("Disciplines").getQuery().findInBackground((disciplines, e3) -> {
+                        if (e3 == null) {
+                            eventToAdd.setDisciplines(disciplines);
+                        }
+                    });
+                    result.add(eventToAdd);
+                }
+                allEvents.postValue(result);
+            });
+        }
+
+        return allEvents;
+    }
+    //endregion
+
+    //region NewEvent
+    private final MutableLiveData<Pair<String, ParseGeoPoint>> addressCheckResult = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> newEventSaved = new MutableLiveData<>();
 
     public LiveData<Pair<String, ParseGeoPoint>> getAddressCheckResult() {
         return addressCheckResult;
     }
+
     // method to validate an address via Google Address Validation API, result is posted to LiveData
     public void validateAddress(String addressToCheck) {
         // build RequestBody: https://developers.google.com/maps/documentation/address-validation/reference/rest/v1/TopLevel/validateAddress#request-body
@@ -135,6 +183,7 @@ public class MyBackendConnection {
     public LiveData<Boolean> getNewEventSaved() {
         return newEventSaved;
     }
+
     public void saveNewEvent(Event event) {
         ParseObject newEvent = new ParseObject("Event");
         newEvent.put("Name", event.getName());
@@ -151,4 +200,5 @@ public class MyBackendConnection {
             disciplineRelation.add(discipline);
         newEvent.saveInBackground(e -> newEventSaved.setValue(e == null));
     }
+    //endregion
 }
