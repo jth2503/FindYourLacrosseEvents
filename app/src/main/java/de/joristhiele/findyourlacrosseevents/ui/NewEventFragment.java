@@ -162,8 +162,7 @@ public class NewEventFragment extends Fragment {
                         .setSelection(selectedDateSource != null
                                 ? selectedDateSource.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()              // use UTC to always have correct date
                                 : LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()                 // use UTC to always have correct date
-                        )
-                        .build();
+                        ).build();
                 datePicker.addOnPositiveButtonClickListener(selection -> {
                     editText.setText(Instant.ofEpochMilli(selection).atZone(ZoneId.of("UTC")).toLocalDate().toString());    // use UTC to always have correct date
                     v.clearFocus();

@@ -59,6 +59,7 @@ import de.joristhiele.findyourlacrosseevents.MyViewModel;
 import de.joristhiele.findyourlacrosseevents.R;
 import de.joristhiele.findyourlacrosseevents.Util;
 import de.joristhiele.findyourlacrosseevents.data.Event;
+import de.joristhiele.findyourlacrosseevents.data.Filter;
 import de.joristhiele.findyourlacrosseevents.data.FilterCategory;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
@@ -118,12 +119,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
         });
 
+        //
+        Filter oldFilter = viewModel.getFilter().getValue();
+        if (viewModel.getSearchRadius().getValue() != 0.0f)
+            etFilterSearchRadius.setText(viewModel.getSearchRadius().getValue().toString());
+        etFilterName.setText(oldFilter.getFilterName());
+        if (oldFilter.getFilterStartDate() != null)
+            etFilterStartDate.setText(oldFilter.getFilterStartDate().format(DateTimeFormatter.ISO_DATE));
+        if (oldFilter.getFilterEndDate() != null)
+            etFilterEndDate.setText(oldFilter.getFilterEndDate().format(DateTimeFormatter.ISO_DATE));
+
         // setup text watchers on the filter edit texts to update the viewmodel
         setupEditTextWatchers();
 
         // setup the datepicker functionality
-        setupDatePickers(etFilterStartDate, R.string.filter_event_dates_start_label);
-        setupDatePickers(etFilterEndDate, R.string.filter_event_dates_end_label);
+        setupDatePickers(etFilterStartDate, R.string.filter_event_dates_start_label, oldFilter.getFilterStartDate());
+        setupDatePickers(etFilterEndDate, R.string.filter_event_dates_end_label, oldFilter.getFilterEndDate());
 
         // setup the chip groups with all available event categories from server
         setupChipGroupWithData(cgFilterGender, viewModel.getAllGenders(), "GenderName", FilterCategory.GENDER);
@@ -267,7 +278,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
     }
 
-    private void setupDatePickers(TextInputEditText editText, int titleResource) {
+    private void setupDatePickers(TextInputEditText editText, int titleResource, LocalDate preselectedDate) {
         // disable keyboard
         editText.setShowSoftInputOnFocus(false);
         // show datepicker when editText receives focus
@@ -275,7 +286,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             if (hasFocus) {
                 MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                         .setTitleText(titleResource)
-                        .build();
+                        .setSelection(preselectedDate != null
+                                ? preselectedDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()              // use UTC to always have correct date
+                                : LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()                 // use UTC to always have correct date)
+                        ).build();
                 datePicker.addOnPositiveButtonClickListener(selection -> {
                     editText.setText(Instant.ofEpochMilli(selection).atZone(ZoneId.of("UTC")).toLocalDate().toString());    // use UTC to always have correct date
                     v.clearFocus();
@@ -296,12 +310,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 chip.setText(item.getString(columnName));
                 chipGroup.addView(chip);
 
-                chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        viewModel.updateFilter(filterCategory, item, isChecked);
-                    }
-                });
+                // select values from viewModel
+                switch (filterCategory) {
+                    case EVENT_TYPE:
+                        chip.setChecked(viewModel.getFilter().getValue().getFilterEventTypes().stream().map(ParseObject::getObjectId).collect(Collectors.toList()).contains(item.getObjectId()));
+                        break;
+                    case GENDER:
+                        chip.setChecked(viewModel.getFilter().getValue().getFilterGenders().stream().map(ParseObject::getObjectId).collect(Collectors.toList()).contains(item.getObjectId()));
+                        break;
+                    case DISCIPLINE:
+                        chip.setChecked(viewModel.getFilter().getValue().getFilterDisciplines().stream().map(ParseObject::getObjectId).collect(Collectors.toList()).contains(item.getObjectId()));
+                        break;
+                }
+
+                chip.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.updateFilter(filterCategory, item, isChecked));
             }
         });
     }

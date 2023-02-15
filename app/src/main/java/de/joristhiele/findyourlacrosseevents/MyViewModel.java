@@ -103,7 +103,7 @@ public class MyViewModel extends AndroidViewModel {
         filter.setValue(filter.getValue());
     }
 
-    private LiveData<Filter> getFilter() {
+    public LiveData<Filter> getFilter() {
         if (filter == null) {
             filter = new MutableLiveData<>();
             filter.setValue(new Filter());
