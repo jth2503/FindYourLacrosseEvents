@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/favorite_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="@dimen/half_default_margin"
+        android:layout_marginBottom="@dimen/half_default_margin"/>
+
+    <TextView
+        android:id="@+id/favorite_address_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites_address"
+        android:layout_below="@id/favorite_title"
+        android:layout_alignTop="@+id/favorites_address"
+        android:layout_alignBottom="@+id/favorites_address"/>
+
+    <TextView
+        android:id="@+id/favorites_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/favorite_title"
+        android:layout_toEndOf="@+id/favorite_address_label"
+        android:layout_alignStart="@+id/favorites_disciplines"/>
+
+    <TextView
+        android:id="@+id/favorite_dates_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites_dates"
+        android:layout_below="@+id/favorite_address_label"
+        android:layout_alignTop="@+id/favorites_dates"
+        android:layout_alignBottom="@+id/favorites_dates"/>
+
+    <TextView
+        android:id="@+id/favorites_dates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/favorites_address"
+        android:layout_toEndOf="@id/favorite_dates_label"
+        android:layout_alignStart="@+id/favorites_disciplines"/>
+
+    <TextView
+        android:id="@+id/favorites_event_type_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites_event_type"
+        android:layout_below="@+id/favorite_dates_label"
+        android:layout_alignTop="@+id/favorites_event_type"
+        android:layout_alignBottom="@+id/favorites_event_type"/>
+
+    <TextView
+        android:id="@+id/favorites_event_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/favorites_dates"
+        android:layout_toEndOf="@id/favorites_event_type_label"
+        android:layout_alignStart="@+id/favorites_disciplines"/>
+
+    <TextView
+        android:id="@+id/favorites_genders_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites_genders"
+        android:layout_below="@+id/favorites_event_type_label"
+        android:layout_alignTop="@+id/favorites_genders"
+        android:layout_alignBottom="@+id/favorites_genders"/>
+
+    <TextView
+        android:id="@+id/favorites_genders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/favorites_event_type"
+        android:layout_toEndOf="@id/favorites_genders_label"
+        android:layout_alignStart="@+id/favorites_disciplines"/>
+
+    <TextView
+        android:id="@+id/favorites_disciplines_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites_disciplines"
+        android:layout_below="@+id/favorites_genders_label"
+        android:layout_alignTop="@+id/favorites_disciplines"
+        android:layout_alignBottom="@+id/favorites_disciplines"/>
+
+    <TextView
+        android:id="@+id/favorites_disciplines"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_margin"
+        android:layout_below="@id/favorites_genders"
+        android:layout_toEndOf="@id/favorites_disciplines_label"/>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.provider.Settings;
@@ -20,9 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -51,7 +48,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.joristhiele.findyourlacrosseevents.Constants;
@@ -331,12 +327,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Nullable
     @Override
     public View getInfoContents(@NonNull Marker marker) {
-        Log.d("JORIS", "getInfoContents: betreten");
         View view = getLayoutInflater().inflate(R.layout.custom_info_contents, null);
         Event event = viewModel.getEvent(String.valueOf(marker.getTag()));
         ((TextView) view.findViewById(R.id.title)).setText(event.getName());
         if (preferences.contains((String) marker.getTag())) {
-            Log.d("JORIS", "getInfoContents: if betreten");
             view.findViewById(R.id.marker_favorite_icon).setVisibility(View.VISIBLE);
             ((TextView) view.findViewById(R.id.marker_favorite_info)).setText(R.string.marker_favorite_marked);
         }
@@ -344,16 +338,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         ((TextView) view.findViewById(R.id.marker_dates)).setText(getString(R.string.marker_dates, event.getStartDate(), event.getEndDate()));
         ((TextView) view.findViewById(R.id.marker_event_type)).setText(getString(R.string.marker_event_type, event.getEventType().getString("EventTypeName")));
         StringBuilder builder = new StringBuilder();
-        for (ParseObject gender : event.getGenders()) {
-            builder.append(gender.getString("GenderName"));
-            builder.append(" ");
-        }
+        for (ParseObject gender : event.getGenders())
+            builder.append(gender.getString("GenderName")).append(Constants.EVENT_CATEGORY_DELIMITER);
+        builder.setLength(builder.length() - Constants.EVENT_CATEGORY_DELIMITER.length());
         ((TextView) view.findViewById(R.id.marker_genders)).setText(getString(R.string.marker_genders, builder.toString()));
         builder = new StringBuilder();
-        for (ParseObject discipline : event.getDisciplines()) {
-            builder.append(discipline.getString("DisciplineName"));
-            builder.append(" ");
-        }
+        for (ParseObject discipline : event.getDisciplines())
+            builder.append(discipline.getString("DisciplineName")).append(Constants.EVENT_CATEGORY_DELIMITER);
+        builder.setLength(builder.length() - Constants.EVENT_CATEGORY_DELIMITER.length());
         ((TextView) view.findViewById(R.id.marker_disciplines)).setText(getString(R.string.marker_disciplines, builder.toString()));
         return view;
     }

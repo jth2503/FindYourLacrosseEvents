@@ -53,6 +53,14 @@
     <string name="new_event_save_failed">An unexpected error occurred while creating event. Please contact the developer team.</string>
     <string name="new_event_values_required">Please fill out all form fields.</string>
 
+    <!-- FavoritesFragment -->
+    <string name="favorites_info">These are all the events you marked as favorite.</string>
+    <string name="favorites_address">Address:</string>
+    <string name="favorites_dates">Dates:</string>
+    <string name="favorites_dates_value">%1$s to %2$s</string>
+    <string name="favorites_event_type">Event Type:</string>
+    <string name="favorites_genders">Genders:</string>
+    <string name="favorites_disciplines">Disciplines:</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

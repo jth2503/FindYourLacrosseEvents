@@ -148,7 +148,7 @@ public class MyViewModel extends AndroidViewModel {
         filter.setValue(newFilter);
     }
 
-    private LiveData<List<Event>> getAllEvents() {
+    public LiveData<List<Event>> getAllEvents() {
         // pull the data from the backend unchanged
         if (allEvents == null) {
             allEvents = Transformations.map(backendConnection.getAllEvents(), allEvents -> allEvents);
