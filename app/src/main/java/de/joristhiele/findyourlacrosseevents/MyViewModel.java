@@ -224,8 +224,8 @@ public class MyViewModel extends AndroidViewModel {
             newEventSaved = Transformations.map(backendConnection.getNewEventSaved(), bool -> bool);
         return newEventSaved;
     }
-    public void saveNewEvent(Event event) {
-        backendConnection.saveNewEvent(event);
+    public void saveNewEvent(Event event, String password) {
+        backendConnection.saveNewEvent(event, password);
     }
     //endregion
 }

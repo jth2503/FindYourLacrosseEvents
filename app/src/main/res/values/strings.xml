@@ -52,6 +52,11 @@
     <string name="new_event_save_successful">Event created successfully.</string>
     <string name="new_event_save_failed">An unexpected error occurred while creating event. Please contact the developer team.</string>
     <string name="new_event_values_required">Please fill out all form fields.</string>
+    <string name="new_event_dialog_title">Choose a password</string>
+    <string name="new_event_dialog_info">With this password you can later edit your event\'s data or delete it completely.</string>
+    <string name="new_event_dialog_password">Password</string>
+    <string name="new_event_dialog_password_confirm">Confirm password</string>
+    <string name="new_event_dialog_passwords_unequal">Passwords have to be the same</string>
 
     <!-- FavoritesFragment -->
     <string name="favorites_info">These are all the events you marked as favorite.</string>
@@ -61,6 +66,7 @@
     <string name="favorites_event_type">Event Type:</string>
     <string name="favorites_genders">Genders:</string>
     <string name="favorites_disciplines">Disciplines:</string>
+    <string name="favorites_reload">PLEASE RELOAD THIS PAGE</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

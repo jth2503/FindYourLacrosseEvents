@@ -1,15 +1,17 @@
 package de.joristhiele.findyourlacrosseevents.ui;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -98,7 +100,36 @@ public class NewEventFragment extends Fragment {
         // listener to validate the entered address and send the data to the server
         fabCreate.setOnClickListener(v -> {
             if (addressValidated) {
-                viewModel.saveNewEvent(viewModel.getNewEvent());
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.new_event_dialog_title)
+                        .setView(getLayoutInflater().inflate(R.layout.dialog_password, null))
+                        .setPositiveButton(R.string.new_event_create, null)
+                        .setNegativeButton(R.string.cancel, null)
+                        .create();
+                dialog.show();
+                TextInputLayout confirmLayout = dialog.findViewById(R.id.confirm_password_til);
+                TextInputEditText password = dialog.findViewById(R.id.password_et);
+                TextInputEditText confirm = dialog.findViewById(R.id.confirm_password_et);
+                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setEnabled(false);
+                positiveButton.setOnClickListener(v1 -> {
+                    viewModel.saveNewEvent(viewModel.getNewEvent(), password.getText().toString());
+                    dialog.cancel();
+                });
+                confirm.addTextChangedListener(new Util.MyTextWatcher() {
+                    @Override
+                    public void afterTextChanged(Editable confirmEditable) {
+                        if (!Util.StringIsNullOrEmpty(confirmEditable) && !Util.StringIsNullOrEmpty(password.getText())) {
+                            if (!confirmEditable.toString().equals(password.getText().toString())) {
+                                confirmLayout.setError(getString(R.string.new_event_dialog_passwords_unequal));
+                                positiveButton.setEnabled(false);
+                            } else {
+                                confirmLayout.setError(null);
+                                positiveButton.setEnabled(true);
+                            }
+                        }
+                    }
+                });
             } else if (
                     ! Util.StringIsNullOrEmpty(etName.getText())
                     && ! Util.StringIsNullOrEmpty(etAddress.getText())
@@ -145,6 +176,7 @@ public class NewEventFragment extends Fragment {
                 cgDiscipline.clearCheck();
                 cgEventType.clearCheck();
                 viewModel.clearNewEventData();
+                ((MainNavigationActivity) getActivity()).setWorkingOnEvent(false);
             } else {
                 Toast.makeText(getContext(), R.string.new_event_save_failed, Toast.LENGTH_SHORT).show();
             }

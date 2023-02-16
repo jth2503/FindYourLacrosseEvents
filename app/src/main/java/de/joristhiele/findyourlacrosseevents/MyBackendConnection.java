@@ -184,7 +184,7 @@ public class MyBackendConnection {
         return newEventSaved;
     }
 
-    public void saveNewEvent(Event event) {
+    public void saveNewEvent(Event event, String password) {
         ParseObject newEvent = new ParseObject("Event");
         newEvent.put("Name", event.getName());
         newEvent.put("Address", event.getAddress());
@@ -198,6 +198,7 @@ public class MyBackendConnection {
         ParseRelation<ParseObject> disciplineRelation = newEvent.getRelation("Disciplines");
         for (ParseObject discipline : event.getDisciplines())
             disciplineRelation.add(discipline);
+        newEvent.put("Password", password);
         newEvent.saveInBackground(e -> newEventSaved.setValue(e == null));
     }
     //endregion

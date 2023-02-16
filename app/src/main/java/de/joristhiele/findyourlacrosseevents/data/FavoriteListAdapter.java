@@ -87,6 +87,11 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                 builder.append(gender.getString("DisciplineName")).append(Constants.EVENT_CATEGORY_DELIMITER);
             builder.setLength(builder.length() - Constants.EVENT_CATEGORY_DELIMITER.length());
             holder.getTvDisciplines().setText(builder.toString());
+        } else {
+            String placeholder = holder.itemView.getContext().getString(R.string.favorites_reload);
+            holder.getTvEventType().setText(placeholder);
+            holder.getTvGenders().setText(placeholder);
+            holder.getTvDisciplines().setText(placeholder);
         }
     }
 
