@@ -1,20 +1,20 @@
 package de.joristhiele.findyourlacrosseevents.ui;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.Editable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
+import android.text.Editable;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -35,18 +35,19 @@ import de.joristhiele.findyourlacrosseevents.MyViewModel;
 import de.joristhiele.findyourlacrosseevents.R;
 import de.joristhiele.findyourlacrosseevents.Util;
 import de.joristhiele.findyourlacrosseevents.data.EditEventState;
+import de.joristhiele.findyourlacrosseevents.data.Event;
 
-public class NewEventFragment extends Fragment {
+public class EditEventFragment extends Fragment {
 
     private MyViewModel viewModel;
-    private boolean addressValidated = false;
+    private boolean addressValidated = true;
 
     TextInputLayout tilAddressCheck;
     TextInputEditText etName, etAddress, etAddressCheck, etStartDate, etEndDate;
     ChipGroup cgGender, cgDiscipline, cgEventType;
-    ExtendedFloatingActionButton fabCreate;
+    ExtendedFloatingActionButton fabUpdate;
 
-    public NewEventFragment() {
+    public EditEventFragment() {
     }
 
     @Override
@@ -57,7 +58,7 @@ public class NewEventFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_new_event, container, false);
+        return inflater.inflate(R.layout.fragment_edit_event, container, false);
     }
 
     @Override
@@ -66,81 +67,59 @@ public class NewEventFragment extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(MyViewModel.class);
 
+        viewModel.getEventToEditFromBackend().observe(getViewLifecycleOwner(), new Observer<Event>() {
+            @Override
+            public void onChanged(Event event) {
+                viewModel.setEventToEdit(event);
+            }
+        });
+
         // instantiate all the UI components
-        tilAddressCheck = view.findViewById(R.id.new_event_address_check_til);
-        etName = view.findViewById(R.id.new_event_name_et);
-        etAddress = view.findViewById(R.id.new_event_address_et);
-        etAddressCheck = view.findViewById(R.id.new_event_address_check_et);
-        etStartDate = view.findViewById(R.id.new_event_dates_start_et);
-        etEndDate = view.findViewById(R.id.new_event_dates_end_et);
-        cgGender = view.findViewById(R.id.new_event_genders);
-        cgDiscipline = view.findViewById(R.id.new_event_discipline);
-        cgEventType = view.findViewById(R.id.new_event_event_type);
-        fabCreate = view.findViewById(R.id.create_event_fab);
+        tilAddressCheck = view.findViewById(R.id.edit_event_address_check_til);
+        etName = view.findViewById(R.id.edit_event_name_et);
+        etAddress = view.findViewById(R.id.edit_event_address_et);
+        etAddressCheck = view.findViewById(R.id.edit_event_address_check_et);
+        etStartDate = view.findViewById(R.id.edit_event_dates_start_et);
+        etEndDate = view.findViewById(R.id.edit_event_dates_end_et);
+        cgGender = view.findViewById(R.id.edit_event_genders);
+        cgDiscipline = view.findViewById(R.id.edit_event_discipline);
+        cgEventType = view.findViewById(R.id.edit_event_event_type);
+        fabUpdate = view.findViewById(R.id.update_event_fab);
 
         // setup the datepicker functionality
-        setupDatePickers(etStartDate, R.string.new_event_start_dialog, viewModel.getNewEvent().getStartDate());
-        setupDatePickers(etEndDate, R.string.new_event_end_dialog, viewModel.getNewEvent().getEndDate());
+        setupDatePickers(etStartDate, R.string.new_event_start_dialog, viewModel.getEventToEdit().getStartDate());
+        setupDatePickers(etEndDate, R.string.new_event_end_dialog, viewModel.getEventToEdit().getEndDate());
 
         // setup the chip groups with all available event categories from server
-        setupChipGroupWithData(cgGender, viewModel.getAllGenders(), "GenderName", viewModel.getNewEvent().getGenders());
-        setupChipGroupWithData(cgDiscipline, viewModel.getAllDisciplines(), "DisciplineName", viewModel.getNewEvent().getDisciplines());
+        setupChipGroupWithData(cgGender, viewModel.getAllGenders(), "GenderName", viewModel.getEventToEdit().getGenders());
+        setupChipGroupWithData(cgDiscipline, viewModel.getAllDisciplines(), "DisciplineName", viewModel.getEventToEdit().getDisciplines());
         setupChipGroupWithData(cgEventType, viewModel.getAllEventTypes(), "EventTypeName", null);
 
         // fill the views with stored viewmodel data
-        etName.setText(viewModel.getNewEvent().getName());
-        etAddress.setText(viewModel.getNewEvent().getAddress());
-        if (viewModel.getNewEvent().getStartDate() != null)
-            etStartDate.setText(viewModel.getNewEvent().getStartDate().format(DateTimeFormatter.ISO_DATE));
-        if (viewModel.getNewEvent().getEndDate() != null)
-            etEndDate.setText(viewModel.getNewEvent().getEndDate().format(DateTimeFormatter.ISO_DATE));
+        etName.setText(viewModel.getEventToEdit().getName());
+        etAddress.setText(viewModel.getEventToEdit().getAddress());
+        if (viewModel.getEventToEdit().getStartDate() != null)
+            etStartDate.setText(viewModel.getEventToEdit().getStartDate().format(DateTimeFormatter.ISO_DATE));
+        if (viewModel.getEventToEdit().getEndDate() != null)
+            etEndDate.setText(viewModel.getEventToEdit().getEndDate().format(DateTimeFormatter.ISO_DATE));
 
         // setup TextChangedListeners for all EditTexts to automatically update ViewModel
         setupEditTextTextWatchers();
 
         // listener to validate the entered address and send the data to the server
-        fabCreate.setOnClickListener(v -> {
+        fabUpdate.setOnClickListener(v -> {
             if (addressValidated) {
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.new_event_dialog_title)
-                        .setView(getLayoutInflater().inflate(R.layout.dialog_password, null))
-                        .setPositiveButton(R.string.new_event_create, null)
-                        .setNegativeButton(R.string.cancel, null)
-                        .create();
-                dialog.show();
-                TextInputLayout confirmLayout = dialog.findViewById(R.id.confirm_password_til);
-                TextInputEditText password = dialog.findViewById(R.id.password_et);
-                TextInputEditText confirm = dialog.findViewById(R.id.confirm_password_et);
-                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setEnabled(false);
-                positiveButton.setOnClickListener(v1 -> {
-                    viewModel.saveNewEvent(viewModel.getNewEvent(), password.getText().toString());
-                    dialog.cancel();
-                });
-                confirm.addTextChangedListener(new Util.MyTextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable confirmEditable) {
-                        if (!Util.StringIsNullOrEmpty(confirmEditable) && !Util.StringIsNullOrEmpty(password.getText())) {
-                            if (!confirmEditable.toString().equals(password.getText().toString())) {
-                                confirmLayout.setError(getString(R.string.new_event_dialog_passwords_unequal));
-                                positiveButton.setEnabled(false);
-                            } else {
-                                confirmLayout.setError(null);
-                                positiveButton.setEnabled(true);
-                            }
-                        }
-                    }
-                });
+                viewModel.updateEvent(viewModel.getEventToEdit());
             } else if (
                     ! Util.StringIsNullOrEmpty(etName.getText())
-                    && ! Util.StringIsNullOrEmpty(etAddress.getText())
-                    && ! Util.StringIsNullOrEmpty(etStartDate.getText())
-                    && ! Util.StringIsNullOrEmpty(etEndDate.getText())
-                    && ! cgGender.getCheckedChipIds().isEmpty()
-                    && ! cgDiscipline.getCheckedChipIds().isEmpty()
-                    && cgEventType.getCheckedChipId() != View.NO_ID
+                            && ! Util.StringIsNullOrEmpty(etAddress.getText())
+                            && ! Util.StringIsNullOrEmpty(etStartDate.getText())
+                            && ! Util.StringIsNullOrEmpty(etEndDate.getText())
+                            && ! cgGender.getCheckedChipIds().isEmpty()
+                            && ! cgDiscipline.getCheckedChipIds().isEmpty()
+                            && cgEventType.getCheckedChipId() != View.NO_ID
             ){
-                viewModel.validateAddress(viewModel.getNewEvent().getAddress());
+                viewModel.validateAddress(viewModel.getEventToEdit().getAddress());
             } else {
                 Toast.makeText(getContext(), R.string.new_event_values_required, Toast.LENGTH_SHORT).show();
             }
@@ -155,20 +134,20 @@ public class NewEventFragment extends Fragment {
                 tilAddressCheck.setVisibility(View.VISIBLE);                                // show confirmation text field
                 tilAddressCheck.setEndIconOnClickListener(v -> {                            // confirmation click listener:
                     etAddress.setText(stringParseGeoPointPair.first);                           // enter confirmed address into address field
-                    viewModel.getNewEvent().setLocation(stringParseGeoPointPair.second);        // set the location accordingly
+                    viewModel.getEventToEdit().setLocation(stringParseGeoPointPair.second);        // set the location accordingly
                     tilAddressCheck.setVisibility(View.GONE);                                   // make confirmation field disappear
                     addressValidated = true;                                                    // address got validated
-                    fabCreate.setText(R.string.new_event_create);                               // change the text on the action button
+                    fabUpdate.setText(R.string.edit_event_fab_update);                      // change the text on the action button
                 });
                 etAddressCheck.setText(stringParseGeoPointPair.first);                      // display API response address
                 etAddress.requestFocus();                                                   // focus to the address field
             }
         });
 
-        // define reaction to saving of new event
+        // define reaction to updating of event
         viewModel.getEventSaved().observe(getViewLifecycleOwner(), aBoolean -> {
             if (aBoolean) {
-                Toast.makeText(getContext(), R.string.new_event_save_successful, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.edit_event_update_successful, Toast.LENGTH_LONG).show();
                 etName.setText(Constants.EMPTY_STRING);
                 etAddress.setText(Constants.EMPTY_STRING);
                 etStartDate.setText(Constants.EMPTY_STRING);
@@ -176,10 +155,10 @@ public class NewEventFragment extends Fragment {
                 cgGender.clearCheck();
                 cgDiscipline.clearCheck();
                 cgEventType.clearCheck();
-                viewModel.clearNewEventData();
+                viewModel.clearEditEventData();
                 ((MainNavigationActivity) getActivity()).setWorkingOnEvent(EditEventState.NONE);
             } /*else {
-                Toast.makeText(getContext(), R.string.new_event_save_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.edit_event_update_failed, Toast.LENGTH_SHORT).show();
             }*/
         });
     }
@@ -216,8 +195,8 @@ public class NewEventFragment extends Fragment {
                 chip.setText(item.getString(columnName));
 
                 // check the chip depending on ViewModel
-                if (selectedCategoriesSource == null && viewModel.getNewEvent().getEventType() != null) {   // there is no list to update, so the ChipGroup has to be for EventType
-                    chip.setChecked(viewModel.getNewEvent().getEventType().getObjectId().equals(item.getObjectId()));
+                if (selectedCategoriesSource == null && viewModel.getEventToEdit().getEventType() != null) {   // there is no list to update, so the ChipGroup has to be for EventType
+                    chip.setChecked(viewModel.getEventToEdit().getEventType().getObjectId().equals(item.getObjectId()));
                 } else if (selectedCategoriesSource != null) {                                              // check if the list contains any item with the same id as the Chip
                     chip.setChecked(selectedCategoriesSource.stream().anyMatch(category -> category.getObjectId().equals(item.getObjectId())));
                 }
@@ -225,7 +204,7 @@ public class NewEventFragment extends Fragment {
                 // update ViewModel when Chips are un/checked
                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (selectedCategoriesSource == null) {
-                        viewModel.getNewEvent().setEventType(isChecked ? item : null);
+                        viewModel.getEventToEdit().setEventType(isChecked ? item : null);
                     } else {
                         if (isChecked) {
                             selectedCategoriesSource.add(item);
@@ -243,7 +222,7 @@ public class NewEventFragment extends Fragment {
         etName.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                viewModel.getNewEvent().setName(s.toString());
+                viewModel.getEventToEdit().setName(s.toString());
             }
         });
         etAddress.addTextChangedListener(new Util.MyTextWatcher() {
@@ -252,23 +231,23 @@ public class NewEventFragment extends Fragment {
                 // address is no longer validated after edit
                 if (addressValidated) {
                     addressValidated = false;
-                    fabCreate.setText(R.string.new_event_validate_address);
+                    fabUpdate.setText(R.string.new_event_validate_address);
                 }
-                viewModel.getNewEvent().setAddress(s.toString());
+                viewModel.getEventToEdit().setAddress(s.toString());
             }
         });
         etStartDate.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!Util.StringIsNullOrEmpty(s))
-                    viewModel.getNewEvent().setStartDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
+                    viewModel.getEventToEdit().setStartDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
             }
         });
         etEndDate.addTextChangedListener(new Util.MyTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!Util.StringIsNullOrEmpty(s))
-                    viewModel.getNewEvent().setEndDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
+                    viewModel.getEventToEdit().setEndDate(LocalDate.parse(s.toString(), DateTimeFormatter.ISO_DATE));
             }
         });
     }

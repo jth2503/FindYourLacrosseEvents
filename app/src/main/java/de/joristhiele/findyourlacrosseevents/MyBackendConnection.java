@@ -10,7 +10,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -137,9 +136,121 @@ public class MyBackendConnection {
     }
     //endregion
 
+    //region EditEvent
+    private boolean eventTypeLoaded = false, gendersLoaded = false, disciplinesLoaded = false;
+    private boolean genderCallback = false, disciplineCallback = false;
+    private final MutableLiveData<Event> eventToEdit = new MutableLiveData<>();
+
+    public LiveData<Event> getEventToEdit() {
+        return eventToEdit;
+    }
+
+    public void findEvent(String password) {
+        if (password == null) {
+            eventToEdit.setValue(null);
+            return;
+        }
+        ParseQuery<ParseObject> query = new ParseQuery<>("Event");
+        query.whereEqualTo("Password", password);
+        query.getFirstInBackground((object, e) -> {
+            if (e == null) {
+                Event retrievedEvent = new Event();
+                retrievedEvent.setId(object.getObjectId());
+                retrievedEvent.setName(object.getString("Name"));
+                retrievedEvent.setAddress(object.getString("Address"));
+                retrievedEvent.setLocation(object.getParseGeoPoint("Location"));
+                retrievedEvent.setStartDate(object.getDate("StartDate").toInstant().atZone(ZoneId.of("UTC")).toLocalDate());
+                retrievedEvent.setEndDate(object.getDate("EndDate").toInstant().atZone(ZoneId.of("UTC")).toLocalDate());
+                object.getParseObject("EventType").fetchIfNeededInBackground((eventType, e1) -> {
+                    if (e1 == null) {
+                        retrievedEvent.setEventType(eventType);
+                        eventTypeLoaded = true;
+                        synchronizeFindEventsCallbacks(retrievedEvent);
+                    }
+                });
+                object.getRelation("Genders").getQuery().findInBackground((genders, e2) -> {
+                    if (e2 == null) {
+                        retrievedEvent.setGenders(genders);
+                        gendersLoaded = true;
+                        synchronizeFindEventsCallbacks(retrievedEvent);
+                    }
+                });
+                object.getRelation("Disciplines").getQuery().findInBackground((disciplines, e3) -> {
+                    if (e3 == null) {
+                        retrievedEvent.setDisciplines(disciplines);
+                        disciplinesLoaded = true;
+                        synchronizeFindEventsCallbacks(retrievedEvent);
+                    }
+                });
+            } else {
+                eventToEdit.setValue(null);
+            }
+        });
+    }
+
+    private void synchronizeFindEventsCallbacks(Event event) {
+        if (eventTypeLoaded && gendersLoaded && disciplinesLoaded) {
+            eventToEdit.setValue(event);
+            eventTypeLoaded = false;
+            gendersLoaded = false;
+            disciplinesLoaded = false;
+        }
+    }
+
+    public void updateEvent(Event event) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Event");
+        query.getInBackground(event.getId(), (object, e) -> {
+            if (e == null) {
+                for (ParseObject o : event.getGenders())
+                    Log.d("JORIS", "updateEvent: "+o.getObjectId());
+                object.put("Name", event.getName());
+                object.put("Address", event.getAddress());
+                object.put("Location", event.getLocation());
+                object.put("StartDate", Date.from(event.getStartDate().atStartOfDay(ZoneId.of("UTC")).toInstant()));       // use UTC to always have correct date
+                object.put("EndDate", Date.from(event.getEndDate().atStartOfDay(ZoneId.of("UTC")).toInstant()));           // use UTC to always have correct date
+                object.put("EventType", event.getEventType());
+                ParseRelation<ParseObject> genderRelation = object.getRelation("Genders");
+                ParseQuery<ParseObject> genderQuery = genderRelation.getQuery();
+                genderQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> oldGenders, ParseException e) {
+                        for (ParseObject oldGender : oldGenders)
+                            genderRelation.remove(oldGender);
+                        for (ParseObject gender : event.getGenders())
+                            genderRelation.add(gender);
+                        genderCallback = true;
+                        synchronizeUpdateEventCallbacks(object);
+                    }
+                });
+                ParseRelation<ParseObject> disciplineRelation = object.getRelation("Disciplines");
+                ParseQuery<ParseObject> disciplineQuery = disciplineRelation.getQuery();
+                disciplineQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> oldDisciplines, ParseException e) {
+                        for (ParseObject oldDiscipline : oldDisciplines)
+                            disciplineRelation.remove(oldDiscipline);
+                        for (ParseObject discipline : event.getDisciplines())
+                            disciplineRelation.add(discipline);
+                        disciplineCallback = true;
+                        synchronizeUpdateEventCallbacks(object);
+                    }
+                });
+            }
+        });
+    }
+
+    private void synchronizeUpdateEventCallbacks(ParseObject object) {
+        if (genderCallback && disciplineCallback) {
+            object.saveInBackground(e1 -> eventSaved.setValue(e1 == null));
+            genderCallback = false;
+            disciplineCallback = false;
+        }
+    }
+    //endregion
+
     //region NewEvent
     private final MutableLiveData<Pair<String, ParseGeoPoint>> addressCheckResult = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> newEventSaved = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> eventSaved = new MutableLiveData<>();
 
     public LiveData<Pair<String, ParseGeoPoint>> getAddressCheckResult() {
         return addressCheckResult;
@@ -180,8 +291,12 @@ public class MyBackendConnection {
         queue.add(request);
     }
 
-    public LiveData<Boolean> getNewEventSaved() {
-        return newEventSaved;
+    public LiveData<Boolean> getEventSaved() {
+        return eventSaved;
+    }
+
+    public void setEventSaved(boolean saved) {
+        eventSaved.setValue(saved);
     }
 
     public void saveNewEvent(Event event, String password) {
@@ -199,7 +314,7 @@ public class MyBackendConnection {
         for (ParseObject discipline : event.getDisciplines())
             disciplineRelation.add(discipline);
         newEvent.put("Password", password);
-        newEvent.saveInBackground(e -> newEventSaved.setValue(e == null));
+        newEvent.saveInBackground(e -> eventSaved.setValue(e == null));
     }
     //endregion
 }

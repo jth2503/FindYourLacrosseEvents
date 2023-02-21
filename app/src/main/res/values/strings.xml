@@ -6,6 +6,8 @@
     <string name="back4app_app_id">f6px2oxKez6qwEfpJqrNe8vyR4RJu6Orbq2SGrpB</string>
     <string name="back4app_client_key">6zP3K36taWHmAxRCoVenI7qYmHlSKStFXhqRKrjf</string>
 
+    <string name="cancel">Cancel</string>
+
     <!-- RequestPermissionsFragment -->
     <string name="permission_explanation">You need to permit this app to access your location to use the \"Event map\" feature.\n
         If no dialog shows up after clicking the button below, you may have to enable access to your location manually in your device settings.</string>
@@ -34,6 +36,20 @@
     <string name="filter_genders_label">Genders:</string>
     <string name="filter_discipline_label">Discipline:</string>
     <string name="filter_type_label">Event type:</string>
+
+    <!-- AddOrEditFragment -->
+    <string name="add_edit_info">You can either edit the data for an existing event or create a completely new event.</string>
+    <string name="add_edit_button_add">Add new event</string>
+    <string name="add_edit_button_show_password">Edit existing event</string>
+    <string name="add_edit_password">Password for the event</string>
+    <string name="add_edit_button_edit">Edit</string>
+    <string name="add_edit_password_empty">Cannot be empty</string>
+
+    <!-- EditEventFragment -->
+    <string name="edit_event_introduction">Please edit the data of your event.</string>
+    <string name="edit_event_fab_update">Update</string>
+    <string name="edit_event_update_successful">Event updated successfully</string>
+    <string name="edit_event_update_failed">An unexpected error occurred while updating event. Please contact the developer team.</string>
 
     <!-- NewEventFragment -->
     <string name="new_event_introduction">Hey! It\'s great that you want to share your event with others from the lacrosse community. To do so please fill in the following data.</string>

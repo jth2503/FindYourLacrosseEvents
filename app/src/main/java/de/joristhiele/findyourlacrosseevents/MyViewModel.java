@@ -10,7 +10,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 
 import com.android.volley.RequestQueue;
@@ -112,11 +111,11 @@ public class MyViewModel extends AndroidViewModel {
         return filter;
     }
 
-    public void updateFilter(FilterCategory category, Object newValue, boolean addToList) {
+    public void updateFilter(FilterCategory attribute, Object newValue, boolean addToList) {
         Filter newFilter = filter.getValue();
         if (newFilter == null)
             return;
-        switch (category) {
+        switch (attribute) {
             case NAME:
                 newFilter.setFilterName((String) newValue);
                 break;
@@ -196,14 +195,52 @@ public class MyViewModel extends AndroidViewModel {
     }
     //endregion
 
+    //region EditEvent
+    private Event eventToEdit;
+    private LiveData<Event> eventToEditFromBackend;
+
+    public Event getEventToEdit() {
+        if (eventToEdit == null)
+            eventToEdit = eventToEditFromBackend.getValue();
+        return eventToEdit;
+    }
+
+    public void setEventToEdit(Event eventToEdit) {
+        this.eventToEdit = eventToEdit;
+    }
+
+    public LiveData<Event> getEventToEditFromBackend() {
+        if (eventToEditFromBackend == null)
+            eventToEditFromBackend = Transformations.map(backendConnection.getEventToEdit(), event -> event);
+        return eventToEditFromBackend;
+    }
+
+    public void clearEditEventData() {
+        findEvent(null);
+        eventToEdit = null;
+        backendConnection.setEventSaved(false);
+    }
+
+    public void findEvent(String password) {
+        backendConnection.findEvent(password);
+    }
+
+    public void updateEvent(Event event) {
+        backendConnection.updateEvent(event);
+    }
+    //endregion
+
     //region NewEvent
     private LiveData<Pair<String, ParseGeoPoint>> addressCheckResult;
-    private LiveData<Boolean> newEventSaved;
+    private LiveData<Boolean> eventSaved;
     private Event newEvent;
 
     public void clearNewEventData() {
-        newEvent.resetData();
+        if (newEvent != null)
+            newEvent.resetData();
+        backendConnection.setEventSaved(false);
     }
+
     public Event getNewEvent() {
         if (newEvent == null)
             newEvent = new Event();
@@ -215,14 +252,15 @@ public class MyViewModel extends AndroidViewModel {
             addressCheckResult = Transformations.map(backendConnection.getAddressCheckResult(), pair -> pair);
         return addressCheckResult;
     }
+
     public void validateAddress(String address) {
         backendConnection.validateAddress(address);
     }
 
-    public LiveData<Boolean> getNewEventSaved() {
-        if (newEventSaved == null)
-            newEventSaved = Transformations.map(backendConnection.getNewEventSaved(), bool -> bool);
-        return newEventSaved;
+    public LiveData<Boolean> getEventSaved() {
+        if (eventSaved == null)
+            eventSaved = Transformations.map(backendConnection.getEventSaved(), bool -> bool);
+        return eventSaved;
     }
     public void saveNewEvent(Event event, String password) {
         backendConnection.saveNewEvent(event, password);
